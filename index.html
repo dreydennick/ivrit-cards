@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#8b2e2e">
-<title>עַל · Карточки иврита</title>
+<title>Карточки иврита</title>
 <link href="https://fonts.googleapis.com/css2?family=David+Libre:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -22,36 +22,54 @@ body{
 }
 .he{font-family:"David Libre",Georgia,serif; direction:rtl}
 .wrap{width:100%; max-width:560px; display:flex; flex-direction:column; gap:12px; flex:1}
+header{display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--brick); padding-bottom:8px}
+header h1{margin:0; font-size:20px; font-weight:700; flex:1}
+header h1 .he{color:var(--brick); font-size:24px}
+header .count{color:var(--mut); font-size:12.5px; text-align:right}
+#backBtn{border:1.5px solid var(--brick); background:none; color:var(--brick); border-radius:8px; padding:7px 12px; font-size:14px; font-weight:700; cursor:pointer}
 
-header{display:flex; align-items:baseline; justify-content:space-between; border-bottom:2px solid var(--brick); padding-bottom:8px}
-header h1{margin:0; font-size:20px; font-weight:700}
-header h1 .he{color:var(--brick); font-size:26px}
-header .count{color:var(--mut); font-size:13px}
+/* ---- меню ---- */
+.lessonList{display:flex; flex-direction:column; gap:12px}
+.lesson{
+  position:relative; text-align:left; cursor:pointer; font:inherit; color:inherit;
+  background:#fffdf9; border:1.5px solid var(--brick); border-radius:6px;
+  padding:14px 16px; display:flex; flex-direction:column; gap:8px;
+  box-shadow:3px 4px 0 var(--brick);
+}
+.lesson:active{transform:translate(1px,1px); box-shadow:2px 3px 0 var(--brick)}
+.lesson .top{display:flex; align-items:center; gap:10px}
+.lesson .date{background:var(--brick); color:#fff; font-size:12px; font-weight:700; border-radius:4px; padding:3px 8px; letter-spacing:.03em}
+.lesson .topic{font-weight:700; font-size:16px; flex:1}
+.lesson .meta{font-size:12.5px; color:var(--mut)}
+.bar{height:6px; background:#eee3da; border-radius:3px; overflow:hidden; display:flex}
+.bar i{display:block; height:100%; background:var(--green)}
+.bar.b2 i{background:#7fae93}
+.syncBox{border-top:1.5px dashed var(--line); padding-top:12px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:var(--mut)}
+.syncBox .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.syncBox input{flex:1; min-width:160px; border:1px solid var(--line); border-radius:6px; padding:8px 10px; font-size:13px; background:#fff}
+.syncBox button{border:1.5px solid var(--brick); background:none; color:var(--brick); border-radius:6px; padding:7px 12px; font-size:13px; font-weight:600; cursor:pointer}
+.syncBox button.solid{background:var(--brick); color:#fff}
+.ok{color:var(--green)} .bad{color:var(--red)}
 
+/* ---- тренировка ---- */
 .controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
 .seg{display:flex; border:1.5px solid var(--brick); border-radius:8px; overflow:hidden}
 .seg button{border:0; background:transparent; color:var(--brick); padding:8px 12px; font-size:14px; font-weight:600; cursor:pointer}
 .seg button.on{background:var(--brick); color:#fff}
 .seg.small button{padding:6px 10px; font-size:13px}
-#nikudTgl{
-  margin-left:auto; display:flex; align-items:center; gap:7px; font-size:14px;
-  color:var(--ink); cursor:pointer; user-select:none; border:0; background:none; padding:6px 2px;
-}
+#nikudTgl{margin-left:auto; display:flex; align-items:center; gap:7px; font-size:14px; color:var(--ink); cursor:pointer; user-select:none; border:0; background:none; padding:6px 2px}
 #nikudTgl .sw{width:38px; height:22px; border-radius:11px; background:var(--line); position:relative; transition:background .15s}
 #nikudTgl .sw::after{content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .15s; box-shadow:0 1px 2px rgba(0,0,0,.25)}
 #nikudTgl.on .sw{background:var(--green)}
 #nikudTgl.on .sw::after{left:18px}
-
 .chips{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
 .chips button{border:1px solid var(--line); background:#fff; color:var(--mut); border-radius:14px; padding:5px 11px; font-size:12.5px; cursor:pointer}
 .chips button.on{border-color:var(--brick); color:var(--brick); background:#f6e9e6; font-weight:600}
 .chips .all{border:0; background:none; text-decoration:underline; padding:5px 4px}
-
 .progressLine{font-size:13px; color:var(--mut); display:flex; justify-content:space-between; align-items:center; gap:8px}
 .progressLine b{color:var(--green)}
 #resetBtn{border:0; background:none; color:var(--mut); text-decoration:underline; font-size:12.5px; cursor:pointer; padding:4px; white-space:nowrap}
 #resetBtn.arm{color:var(--red); font-weight:700; text-decoration:none}
-
 .stage{flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px; min-height:330px}
 .plate{position:relative}
 .plate::before{content:""; position:absolute; inset:10px -8px -10px 8px; background:var(--brick); border-radius:4px; pointer-events:none}
@@ -70,207 +88,352 @@ header .count{color:var(--mut); font-size:13px}
 .tr{font-size:20px; font-style:italic; color:var(--brick)}
 .ru2{font-size:20px}
 .hint{position:absolute; bottom:12px; left:0; right:0; font-size:12px; color:var(--mut)}
-
 .answers{display:flex; gap:10px; visibility:hidden}
 .answers.show{visibility:visible}
 .answers button{flex:1; border:0; border-radius:8px; padding:16px 10px; font-size:16.5px; font-weight:700; color:#fff; cursor:pointer}
 .answers .no{background:var(--red)}
 .answers .yes{background:var(--green)}
 .answers button:active{filter:brightness(.9)}
-
 .stats{display:flex; justify-content:center; gap:18px; font-size:13.5px; color:var(--mut)}
 .stats b{color:var(--ink)}
-
 .done{display:none; flex-direction:column; align-items:center; gap:14px; text-align:center}
 .done.show{display:flex}
 .done .he{font-size:44px; color:var(--brick); font-weight:700}
 .done p{margin:0; font-size:17px}
 .done button{border:1.5px solid var(--brick); background:var(--brick); color:#fff; border-radius:8px; padding:12px 26px; font-size:16px; font-weight:700; cursor:pointer}
 button:focus-visible{outline:3px solid var(--green); outline-offset:2px}
+.hidden{display:none !important}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1><span class="he">עַל</span> · карточки иврита</h1>
-    <span class="count" id="totalCount"></span>
-  </header>
 
-  <div class="controls">
-    <div class="seg" id="dirSeg">
-      <button type="button" data-d="he" class="on">עב → ру</button>
-      <button type="button" data-d="ru">ру → עב</button>
-      <button type="button" data-d="mix">микс</button>
-    </div>
-    <button type="button" id="nikudTgl" class="on" role="switch" aria-checked="true"><span class="sw"></span>огласовки</button>
-  </div>
-
-  <div class="controls">
-    <div class="seg small" id="poolSeg">
-      <button type="button" data-p="all" class="on">все слова</button>
-      <button type="button" data-p="new">только невыученные</button>
-    </div>
-  </div>
-
-  <div class="chips" id="chips"></div>
-
-  <div class="progressLine">
-    <span id="learnedLine"></span>
-    <button type="button" id="resetBtn">сбросить прогресс</button>
-  </div>
-
-  <div class="stage">
-    <div class="plate" id="plate">
-      <button type="button" id="card" aria-label="Карточка — нажми, чтобы перевернуть"></button>
-    </div>
-    <div class="answers" id="answers">
-      <button type="button" class="no" id="btnNo">✗ Повторить</button>
-      <button type="button" class="yes" id="btnYes">✓ Знаю</button>
-    </div>
-    <div class="done" id="doneBox"></div>
-    <div class="stats">
-      <span>осталось <b id="stLeft">0</b></span>
-      <span>знаю <b id="stKnown">0</b></span>
-      <span>повторы <b id="stRep">0</b></span>
+  <!-- ======== МЕНЮ ======== -->
+  <div id="viewMenu">
+    <header>
+      <h1><span class="he">עִבְרִית</span> · карточки</h1>
+      <span class="count" id="menuCount"></span>
+    </header>
+    <div style="height:12px"></div>
+    <div class="lessonList" id="lessonList"></div>
+    <div style="height:16px"></div>
+    <div class="syncBox" id="syncBox">
+      <div class="row"><span id="syncStatus"></span><button type="button" id="syncNow" class="solid">синхронизировать</button></div>
+      <div class="row" id="tokRow">
+        <input type="password" id="tokInput" placeholder="GitHub-токен (repo)" autocomplete="off">
+        <button type="button" id="tokSave">сохранить</button>
+        <button type="button" id="tokDel" class="hidden">удалить токен</button>
+      </div>
+      <div id="syncHint">Токен нужен один раз на устройство — тогда прогресс хранится в progress.json репозитория и общий для всех устройств. Без токена — только локально в этом браузере.</div>
     </div>
   </div>
+
+  <!-- ======== ТРЕНИРОВКА ======== -->
+  <div id="viewTrain" class="hidden">
+    <header>
+      <button type="button" id="backBtn">← меню</button>
+      <h1 id="trainTitle" style="font-size:16px"></h1>
+      <span class="count" id="totalCount"></span>
+    </header>
+    <div style="height:12px"></div>
+    <div class="controls">
+      <div class="seg" id="dirSeg">
+        <button type="button" data-d="he" class="on">עב → ру</button>
+        <button type="button" data-d="ru">ру → עב</button>
+        <button type="button" data-d="mix">микс</button>
+      </div>
+      <button type="button" id="nikudTgl" class="on" role="switch" aria-checked="true"><span class="sw"></span>огласовки</button>
+    </div>
+    <div class="controls" style="margin-top:8px">
+      <div class="seg small" id="poolSeg">
+        <button type="button" data-p="all" class="on">все слова</button>
+        <button type="button" data-p="new">только невыученные</button>
+      </div>
+    </div>
+    <div class="chips" id="chips" style="margin-top:8px"></div>
+    <div class="progressLine" style="margin-top:8px">
+      <span id="learnedLine"></span>
+      <button type="button" id="resetBtn">сбросить прогресс</button>
+    </div>
+    <div class="stage">
+      <div class="plate" id="plate">
+        <button type="button" id="card" aria-label="Карточка — нажми, чтобы перевернуть"></button>
+      </div>
+      <div class="answers" id="answers">
+        <button type="button" class="no" id="btnNo">✗ Повторить</button>
+        <button type="button" class="yes" id="btnYes">✓ Знаю</button>
+      </div>
+      <div class="done" id="doneBox"></div>
+      <div class="stats">
+        <span>осталось <b id="stLeft">0</b></span>
+        <span>знаю <b id="stKnown">0</b></span>
+        <span>повторы <b id="stRep">0</b></span>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="words.js"></script>
 <script>
 "use strict";
-var DB = window.WORDS_DB || {sections:[], words:[]};
-var SECTIONS = DB.sections, W = DB.words;
+var DB = window.WORDS_DB || {lessons:[]};
+var LESSONS = DB.lessons || [];
 
-var KEY="ivrit-cards-v2";
+/* глобальный плоский список слов: {h,t,r,secName,lessonId} */
+var W = [];
+LESSONS.forEach(function(L){
+  (L.words||[]).forEach(function(w){
+    W.push({h:w.h, t:w.t, r:w.r, secName:(L.sections&&L.sections[w.s])||"", lessonId:L.id});
+  });
+});
+
+var KEY="ivrit-cards-v3", KEY_OLD="ivrit-cards-v2", TOKKEY="ivrit-gh-token";
+var GH={owner:"dreydennick", repo:"ivrit-cards", path:"progress.json", branch:"main"};
+
 function stripNikud(s){ return s.replace(/[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/g,""); }
 function $(id){ return document.getElementById(id); }
+function b64u(s){ return btoa(unescape(encodeURIComponent(s))); }
 
-/* ---------- хранилище: localStorage (сайт) -> window.storage (Claude) ---------- */
-var backend = "";
-async function detectBackend(){
-  try{
-    localStorage.setItem(KEY+"-probe","1");
-    localStorage.removeItem(KEY+"-probe");
-    backend="браузер"; return;
-  }catch(e){}
-  try{
-    if(window.storage){
-      var r = await window.storage.set(KEY+"-probe","1",false);
-      if(r){ backend="Claude"; return; }
-    }
-  }catch(e){}
-  backend="";
-}
-async function loadState(){
-  if(backend==="браузер"){
-    try{ var s=localStorage.getItem(KEY); if(s) return JSON.parse(s); }catch(e){}
-    return null;
-  }
-  if(backend==="Claude"){
+/* ---------- состояние ---------- */
+var dir="he", nikud=true, pool="all";
+var prog={};            // ключ слово_напр -> {v:серия, ts:время}
+var currentLesson=null; // id урока или "__all"
+var activeNames={};     // секции текущего урока
+var queue=[], known=0, reps=0, deckSize=0, flipped=false, firstCard=true;
+var view="menu";
+
+/* ---------- локальное хранилище ---------- */
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+function loadLocal(){
+  var s=lsGet(KEY);
+  if(s){ try{ return JSON.parse(s); }catch(e){} }
+  /* миграция со старой версии */
+  var o=lsGet(KEY_OLD);
+  if(o){
     try{
-      var r = await window.storage.get(KEY, false);
-      if(r && r.value) return JSON.parse(r.value);
+      var st=JSON.parse(o), np={}, now=Date.now();
+      if(st.prog) for(var k in st.prog){ np[k]={v:st.prog[k]|0, ts:now}; }
+      return {dir:st.dir, nikud:st.nikud, pool:st.pool, prog:np};
     }catch(e){}
   }
   return null;
 }
-function saveState(){
-  var st = { dir:dir, nikud:nikud, pool:pool, activeNames:activeNames, prog:prog };
-  var s = JSON.stringify(st);
-  if(backend==="браузер"){
-    try{ localStorage.setItem(KEY, s); }catch(e){}
-  } else if(backend==="Claude"){
-    try{ window.storage.set(KEY, s, false).catch(function(){}); }catch(e){}
+function saveLocal(){
+  lsSet(KEY, JSON.stringify({dir:dir, nikud:nikud, pool:pool, prog:prog}));
+}
+
+/* ---------- синхронизация с GitHub ---------- */
+function ghToken(){ return lsGet(TOKKEY)||""; }
+var syncTimer=null, lastSync=0;
+
+function mergeProg(remote){
+  if(!remote) return;
+  for(var k in remote){
+    var r=remote[k], l=prog[k];
+    if(r && typeof r==="object" && (!l || (r.ts||0)>(l.ts||0))) prog[k]=r;
   }
 }
+async function ghPull(){
+  var tok=ghToken();
+  try{
+    var data=null;
+    if(tok){
+      var g=await fetch("https://api.github.com/repos/"+GH.owner+"/"+GH.repo+"/contents/"+GH.path+"?ref="+GH.branch,
+        {headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json"}});
+      if(g.ok){
+        var j=await g.json();
+        data=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))));
+      } else if(g.status!==404){ return false; }
+    } else {
+      var r=await fetch("https://raw.githubusercontent.com/"+GH.owner+"/"+GH.repo+"/"+GH.branch+"/"+GH.path+"?t="+Date.now());
+      if(r.ok) data=await r.json(); else if(r.status!==404) return false;
+    }
+    if(data && data.prog){ mergeProg(data.prog); saveLocal(); }
+    return true;
+  }catch(e){ return false; }
+}
+async function ghPush(){
+  var tok=ghToken(); if(!tok) return false;
+  try{
+    var url="https://api.github.com/repos/"+GH.owner+"/"+GH.repo+"/contents/"+GH.path;
+    var sha=null;
+    var g=await fetch(url+"?ref="+GH.branch,{headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json"}});
+    if(g.ok){
+      var j=await g.json(); sha=j.sha;
+      try{ var remote=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,""))))); mergeProg(remote.prog); }catch(e){}
+    }
+    var body={message:"sync progress", branch:GH.branch, content:b64u(JSON.stringify({prog:prog, ts:Date.now()}))};
+    if(sha) body.sha=sha;
+    var p=await fetch(url,{method:"PUT",
+      headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json", "Content-Type":"application/json"},
+      body:JSON.stringify(body)});
+    if(p.ok){ lastSync=Date.now(); }
+    return p.ok;
+  }catch(e){ return false; }
+}
+function scheduleSync(){
+  if(!ghToken()) return;
+  if(syncTimer) clearTimeout(syncTimer);
+  syncTimer=setTimeout(function(){ ghPush().then(updSyncUI); }, 8000);
+}
+async function syncNow(){
+  var st=$("syncStatus"); st.textContent="синхронизация…"; st.className="";
+  var okPull=await ghPull();
+  var okPush=ghToken() ? await ghPush() : false;
+  updSyncUI(okPull && (okPush||!ghToken()));
+  if(view==="menu") buildMenu(); else { updLearnedLine(); }
+}
+function updSyncUI(ok){
+  var st=$("syncStatus");
+  if(!ghToken()){
+    st.innerHTML='💾 локально <span class="bad">·</span> синхронизация выключена';
+  } else if(ok===false){
+    st.innerHTML='☁ GitHub · <span class="bad">ошибка — проверь токен</span>';
+  } else {
+    st.innerHTML='☁ GitHub · <span class="ok">вкл</span>'+(lastSync?(' · '+new Date(lastSync).toLocaleTimeString().slice(0,5)):'');
+  }
+  var has=!!ghToken();
+  $("tokInput").classList.toggle("hidden",has);
+  $("tokSave").classList.toggle("hidden",has);
+  $("tokDel").classList.toggle("hidden",!has);
+  $("syncHint").classList.toggle("hidden",has);
+}
 
-/* ---------- состояние ---------- */
-var dir="he", nikud=true, pool="all";
-var activeNames={}; SECTIONS.forEach(function(n){ activeNames[n]=true; });
-var prog={};   // ключ: слово-без-огласовок + направление -> серия «знаю» подряд; >=2 = выучено
-var queue=[], known=0, reps=0, deckSize=0, flipped=false, firstCard=true;
-
-var card=$("card"), answers=$("answers"), plate=$("plate"), doneBox=$("doneBox");
-
-function secName(i){ return SECTIONS[W[i].s] || ""; }
-function isActive(i){ return activeNames[secName(i)] !== false; }
-function pk(i,d){ return stripNikud(W[i].h)+"_"+d; }
-function isLearned(i,d){ return (prog[pk(i,d)]||0) >= 2; }
-function learnedCount(d){
-  var n=0; for(var i=0;i<W.length;i++) if(isLearned(i,d)) n++;
+/* ---------- прогресс ---------- */
+function pkW(w,d){ return stripNikud(w.h)+"_"+d; }
+function streak(w,d){ var p=prog[pkW(w,d)]; return p?(p.v|0):0; }
+function isLearnedW(w,d){ return streak(w,d)>=2; }
+function lessonWords(id){ return id==="__all" ? W : W.filter(function(w){ return w.lessonId===id; }); }
+function learnedIn(id,d){
+  var n=0; lessonWords(id).forEach(function(w){ if(isLearnedW(w,d)) n++; });
   return n;
 }
-function activeCount(){ var n=0; SECTIONS.forEach(function(nm){ if(activeNames[nm]!==false) n++; }); return n; }
 
-/* ---------- UI ---------- */
+/* ---------- МЕНЮ ---------- */
+function buildMenu(){
+  $("menuCount").textContent=LESSONS.length+" ур. · "+W.length+" слов";
+  var list=$("lessonList"); list.innerHTML="";
+  function lessonCard(id,date,topic){
+    var ws=lessonWords(id), n=ws.length;
+    var lh=learnedIn(id,"he"), lr=learnedIn(id,"ru");
+    var b=document.createElement("button");
+    b.type="button"; b.className="lesson";
+    b.innerHTML='<div class="top"><span class="date">'+date+'</span><span class="topic">'+topic+'</span></div>'+
+      '<div class="meta">'+n+' слов · выучено: עב→ру '+lh+' · ру→עב '+lr+'</div>'+
+      '<div class="bar"><i style="width:'+(n?Math.round(lh/n*100):0)+'%"></i></div>'+
+      '<div class="bar b2"><i style="width:'+(n?Math.round(lr/n*100):0)+'%"></i></div>';
+    b.addEventListener("click",function(){ openLesson(id, topic); });
+    list.appendChild(b);
+  }
+  if(LESSONS.length>1) lessonCard("__all","ВСЕ","Все уроки вместе");
+  LESSONS.slice().reverse().forEach(function(L){ lessonCard(L.id, L.date, L.topic); });
+  updSyncUI();
+}
+
+function showView(v){
+  view=v;
+  $("viewMenu").classList.toggle("hidden", v!=="menu");
+  $("viewTrain").classList.toggle("hidden", v!=="train");
+  window.scrollTo(0,0);
+}
+
+function openLesson(id, topic){
+  currentLesson=id;
+  activeNames={};
+  var secs=lessonSections(id);
+  secs.forEach(function(n){ activeNames[n]=true; });
+  $("trainTitle").textContent = topic;
+  showView("train");
+  buildDeck();
+}
+function lessonSections(id){
+  if(id==="__all"){
+    var seen={}, out=[];
+    W.forEach(function(w){ if(w.secName && !seen[w.secName]){ seen[w.secName]=1; out.push(w.secName); } });
+    return out;
+  }
+  var L=LESSONS.filter(function(x){return x.id===id;})[0];
+  return (L&&L.sections)||[];
+}
+
+/* ---------- ТРЕНИРОВКА ---------- */
+var card=$("card"), answers=$("answers"), plate=$("plate"), doneBox=$("doneBox");
+
+function trainWords(){
+  return lessonWords(currentLesson).filter(function(w){ return activeNames[w.secName]!==false; });
+}
+function activeCount(){
+  var n=0,k; for(k in activeNames) if(activeNames[k]!==false) n++;
+  return n;
+}
 function buildChips(){
   var box=$("chips"); box.innerHTML="";
-  SECTIONS.forEach(function(name){
+  var secs=lessonSections(currentLesson);
+  secs.forEach(function(name){
     var b=document.createElement("button");
     b.type="button"; b.textContent=name;
     if(activeNames[name]!==false) b.className="on";
     b.addEventListener("click",function(){
-      activeNames[name] = activeNames[name]===false ? true : false;
+      activeNames[name]=activeNames[name]===false?true:false;
       if(!activeCount()) activeNames[name]=true;
-      saveState(); buildDeck();
+      buildDeck();
     });
     box.appendChild(b);
   });
-  var all=document.createElement("button");
-  all.type="button"; all.textContent="все"; all.className="all";
-  all.addEventListener("click",function(){
-    SECTIONS.forEach(function(n){ activeNames[n]=true; });
-    saveState(); buildDeck();
-  });
-  box.appendChild(all);
+  if(secs.length>1){
+    var all=document.createElement("button");
+    all.type="button"; all.textContent="все"; all.className="all";
+    all.addEventListener("click",function(){
+      secs.forEach(function(n){ activeNames[n]=true; });
+      buildDeck();
+    });
+    box.appendChild(all);
+  }
 }
-
 function updLearnedLine(){
-  $("learnedLine").innerHTML =
-    'выучено: עב→ру <b>'+learnedCount("he")+'</b> · ру→עב <b>'+learnedCount("ru")+'</b> из '+W.length;
+  var ws=lessonWords(currentLesson), n=ws.length;
+  $("learnedLine").innerHTML='выучено: עב→ру <b>'+learnedIn(currentLesson,"he")+'</b> · ру→עב <b>'+learnedIn(currentLesson,"ru")+'</b> из '+n;
 }
-
-function cardDir(i){
+function cardDir(w){
   if(dir!=="mix") return dir;
-  var lh=isLearned(i,"he"), lr=isLearned(i,"ru");
-  if(lh && !lr) return "ru";
-  if(lr && !lh) return "he";
-  return Math.random()<.5 ? "he" : "ru";
+  var lh=isLearnedW(w,"he"), lr=isLearnedW(w,"ru");
+  if(lh&&!lr) return "ru";
+  if(lr&&!lh) return "he";
+  return Math.random()<.5?"he":"ru";
 }
-
 function buildDeck(){
   buildChips(); updLearnedLine();
   queue=[];
-  for(var k=0;k<W.length;k++){
-    if(!isActive(k)) continue;
-    var d=cardDir(k);
-    if(pool==="new" && isLearned(k,d)){
+  trainWords().forEach(function(w){
+    var d=cardDir(w);
+    if(pool==="new" && isLearnedW(w,d)){
       if(dir==="mix"){
-        var other = d==="he" ? "ru" : "he";
-        if(!isLearned(k,other)) d=other; else continue;
-      } else continue;
+        var o=d==="he"?"ru":"he";
+        if(!isLearnedW(w,o)) d=o; else return;
+      } else return;
     }
-    queue.push({i:k, d:d});
-  }
+    queue.push({w:w, d:d});
+  });
   for(var a=queue.length-1;a>0;a--){
     var j=Math.floor(Math.random()*(a+1)), t=queue[a]; queue[a]=queue[j]; queue[j]=t;
   }
   deckSize=queue.length; known=0; reps=0; flipped=false;
-  $("totalCount").textContent = deckSize+" карт · "+(backend ? "💾 "+backend : "⚠ без сохранения");
+  $("totalCount").textContent=deckSize+" карт";
   doneBox.className="done";
   if(!deckSize){ showDone(true); return; }
   plate.style.display=""; answers.style.display="";
   render();
 }
-
-function heTxt(s){ return nikud ? s : stripNikud(s); }
-
+function heTxt(s){ return nikud?s:stripNikud(s); }
 function render(){
   if(!queue.length){ showDone(false); return; }
-  var cur=queue[0], w=W[cur.i];
-  var sec='<div class="sec">'+secName(cur.i)+'</div>';
-  var mark=isLearned(cur.i,cur.d)?'<div class="lrn">✓</div>':"";
+  var cur=queue[0], w=cur.w;
+  var sec='<div class="sec">'+w.secName+'</div>';
+  var mark=isLearnedW(w,cur.d)?'<div class="lrn">✓</div>':"";
   var hint=firstCard?'<div class="hint">нажми — перевернётся</div>':"";
   var html;
   if(!flipped){
@@ -283,36 +446,34 @@ function render(){
       : sec+mark+'<div class="big-he mid">'+heTxt(w.h)+'</div><div class="tr">'+w.t+'</div>';
   }
   card.innerHTML=html;
-  answers.className = flipped ? "answers show" : "answers";
+  answers.className=flipped?"answers show":"answers";
   $("stLeft").textContent=queue.length;
   $("stKnown").textContent=known;
   $("stRep").textContent=reps;
 }
-
 function flip(){
-  if(!queue.length) return;
+  if(!queue.length||view!=="train") return;
   flipped=!flipped; firstCard=false;
   render();
 }
-
 function answer(ok){
-  if(!flipped||!queue.length) return;
-  var cur=queue.shift(), key=pk(cur.i,cur.d);
+  if(!flipped||!queue.length||view!=="train") return;
+  var cur=queue.shift(), key=pkW(cur.w,cur.d), now=Date.now();
   if(ok){
     known++;
-    prog[key]=(prog[key]||0)+1;
+    var v=(prog[key]&&prog[key].v|0)||0;
+    prog[key]={v:v+1, ts:now};
   } else {
     reps++;
-    prog[key]=0;
+    prog[key]={v:0, ts:now};
     var pos=Math.min(queue.length, 3+Math.floor(Math.random()*3));
     queue.splice(pos,0,cur);
   }
-  saveState();
+  saveLocal(); scheduleSync();
   updLearnedLine();
   flipped=false;
   render();
 }
-
 function showDone(empty){
   plate.style.display="none"; answers.style.display="none";
   $("stLeft").textContent=0; $("stKnown").textContent=known; $("stRep").textContent=reps;
@@ -320,28 +481,32 @@ function showDone(empty){
   doneBox.innerHTML = empty
     ? '<div class="he">!הַכֹּל</div><p>В этом режиме всё уже выучено 💪</p><button type="button" id="again">Показать все слова</button>'
     : '<div class="he">!סוֹף</div><p>Пройдено: <b>'+deckSize+'</b> · повторов: <b>'+reps+'</b></p><button type="button" id="again">Ещё раз</button>';
-  $("again").addEventListener("click", function(){
+  $("again").addEventListener("click",function(){
     if(empty){
       pool="all";
       var pb=$("poolSeg").querySelectorAll("button");
-      pb.forEach(function(x){ x.className = x.getAttribute("data-p")==="all" ? "on" : ""; });
-      saveState();
+      pb.forEach(function(x){ x.className=x.getAttribute("data-p")==="all"?"on":""; });
+      saveLocal();
     }
     buildDeck();
   });
+  if(!empty){ ghPush().then(updSyncUI); }
 }
 
 /* ---------- события ---------- */
 card.addEventListener("click", flip);
-$("btnNo").addEventListener("click", function(){ answer(false); });
-$("btnYes").addEventListener("click", function(){ answer(true); });
-
+$("btnNo").addEventListener("click",function(){ answer(false); });
+$("btnYes").addEventListener("click",function(){ answer(true); });
+$("backBtn").addEventListener("click",function(){
+  showView("menu"); buildMenu();
+  ghPush().then(updSyncUI);
+});
 var segBtns=$("dirSeg").querySelectorAll("button");
 segBtns.forEach(function(b){
   b.addEventListener("click",function(){
     segBtns.forEach(function(x){ x.className=""; });
     b.className="on"; dir=b.getAttribute("data-d");
-    saveState(); buildDeck();
+    saveLocal(); buildDeck();
   });
 });
 var poolBtns=$("poolSeg").querySelectorAll("button");
@@ -349,56 +514,62 @@ poolBtns.forEach(function(b){
   b.addEventListener("click",function(){
     poolBtns.forEach(function(x){ x.className=""; });
     b.className="on"; pool=b.getAttribute("data-p");
-    saveState(); buildDeck();
+    saveLocal(); buildDeck();
   });
 });
 $("nikudTgl").addEventListener("click",function(){
   nikud=!nikud;
-  this.className = nikud ? "on" : "";
-  this.setAttribute("aria-checked", nikud);
-  saveState(); render();
+  this.className=nikud?"on":"";
+  this.setAttribute("aria-checked",nikud);
+  saveLocal(); render();
 });
-
 var resetArmed=false;
 $("resetBtn").addEventListener("click",function(){
   var b=this;
   if(!resetArmed){
     resetArmed=true; b.className="arm"; b.textContent="точно сбросить?";
-    setTimeout(function(){ resetArmed=false; b.className=""; b.textContent="сбросить прогресс"; }, 3000);
+    setTimeout(function(){ resetArmed=false; b.className=""; b.textContent="сбросить прогресс"; },3000);
   } else {
-    resetArmed=false; prog={};
-    saveState();
+    resetArmed=false;
+    lessonWords(currentLesson).forEach(function(w){
+      prog[pkW(w,"he")]={v:0,ts:Date.now()};
+      prog[pkW(w,"ru")]={v:0,ts:Date.now()};
+    });
+    saveLocal(); scheduleSync();
     b.className=""; b.textContent="сбросить прогресс";
     buildDeck();
   }
 });
-
+$("tokSave").addEventListener("click",function(){
+  var v=$("tokInput").value.trim();
+  if(v){ lsSet(TOKKEY,v); $("tokInput").value=""; syncNow(); }
+});
+$("tokDel").addEventListener("click",function(){
+  lsDel(TOKKEY); updSyncUI();
+});
+$("syncNow").addEventListener("click", syncNow);
 document.addEventListener("keydown",function(e){
+  if(view!=="train") return;
   if(e.key===" "){ e.preventDefault(); flip(); }
   if(e.key==="ArrowLeft"||e.key==="1") answer(false);
   if(e.key==="ArrowRight"||e.key==="2") answer(true);
 });
 
 /* ---------- старт ---------- */
-(async function init(){
-  if(!W.length){
-    card.innerHTML='<div class="ru2">Не найден файл words.js — он должен лежать рядом с index.html</div>';
-    return;
-  }
-  try{ await detectBackend(); }catch(e){}
-  var st=null;
-  try{ st = await loadState(); }catch(e){}
+(function init(){
+  var st=loadLocal();
   if(st){
     if(st.dir) dir=st.dir;
     if(typeof st.nikud==="boolean") nikud=st.nikud;
     if(st.pool) pool=st.pool;
-    if(st.activeNames) SECTIONS.forEach(function(n){ if(n in st.activeNames) activeNames[n]=st.activeNames[n]; });
     if(st.prog) prog=st.prog;
-    segBtns.forEach(function(x){ x.className = x.getAttribute("data-d")===dir ? "on" : ""; });
-    poolBtns.forEach(function(x){ x.className = x.getAttribute("data-p")===pool ? "on" : ""; });
-    var t=$("nikudTgl"); t.className = nikud ? "on" : ""; t.setAttribute("aria-checked", nikud);
   }
-  buildDeck();
+  segBtns.forEach(function(x){ x.className=x.getAttribute("data-d")===dir?"on":""; });
+  poolBtns.forEach(function(x){ x.className=x.getAttribute("data-p")===pool?"on":""; });
+  var t=$("nikudTgl"); t.className=nikud?"on":""; t.setAttribute("aria-checked",nikud);
+  buildMenu();
+  showView("menu");
+  ghPull().then(function(){ if(view==="menu") buildMenu(); });
 })();
 </script>
 </body>
