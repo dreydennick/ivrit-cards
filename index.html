@@ -268,11 +268,23 @@ async function ghPush(){
       var j=await g.json(); sha=j.sha;
       try{ var remote=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,""))))); mergeProg(remote.prog); }catch(e){}
     }
-    var body={message:"sync progress", branch:GH.branch, content:b64u(JSON.stringify({prog:prog, ts:Date.now()}))};
-    if(sha) body.sha=sha;
-    var p=await fetch(url,{method:"PUT",
-      headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json", "Content-Type":"application/json"},
-      body:JSON.stringify(body)});
+    async function doPut(shaVal){
+      var body={message:"sync progress", branch:GH.branch, content:b64u(JSON.stringify({prog:prog, ts:Date.now()}))};
+      if(shaVal) body.sha=shaVal;
+      return await fetch(url,{method:"PUT",
+        headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json", "Content-Type":"application/json"},
+        body:JSON.stringify(body)});
+    }
+    var p=await doPut(sha);
+    if(p.status===409||p.status===422){
+      /* конфликт одновременных сохранений — берём свежий sha и повторяем */
+      var g2=await fetch(url+"?ref="+GH.branch,{headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json"}});
+      if(g2.ok){ var j2=await g2.json();
+        try{ var r2=JSON.parse(decodeURIComponent(escape(atob(j2.content.replace(/\n/g,""))))); mergeProg(r2.prog); }catch(e){}
+        p=await doPut(j2.sha);
+      }
+    }
+    if(p.status===401||p.status===403) return "auth";
     if(p.ok){ lastSync=Date.now(); }
     return p.ok;
   }catch(e){ return false; }
@@ -286,15 +298,17 @@ async function syncNow(){
   var st=$("syncStatus"); st.textContent="синхронизация…"; st.className="";
   var okPull=await ghPull();
   var okPush=ghToken() ? await ghPush() : false;
-  updSyncUI(okPull && (okPush||!ghToken()));
+  updSyncUI(okPush==="auth" ? "auth" : (okPull && (okPush||!ghToken())));
   if(view==="menu") buildMenu(); else { updLearnedLine(); }
 }
 function updSyncUI(ok){
   var st=$("syncStatus");
   if(!ghToken()){
     st.innerHTML='💾 локально <span class="bad">·</span> синхронизация выключена';
+  } else if(ok==="auth"){
+    st.innerHTML='☁ GitHub · <span class="bad">токен не принят — проверь</span>';
   } else if(ok===false){
-    st.innerHTML='☁ GitHub · <span class="bad">ошибка — проверь токен</span>';
+    st.innerHTML='☁ GitHub · <span class="bad">не прошло — попробуй ещё раз</span>';
   } else {
     st.innerHTML='☁ GitHub · <span class="ok">вкл</span>'+(lastSync?(' · '+new Date(lastSync).toLocaleTimeString().slice(0,5)):'');
   }
