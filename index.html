@@ -25,14 +25,20 @@ body{
 }
 body::before{
   content:""; position:fixed; inset:0; z-index:-1;
-  background:var(--paper) url("bg-portrait.jpg") center/cover no-repeat;
+  background-color:var(--paper);
+  background-image:linear-gradient(rgba(250,246,239,.65),rgba(250,246,239,.65)), url("bg-portrait.jpg");
+  background-position:center; background-size:cover; background-repeat:no-repeat;
 }
 @media (min-aspect-ratio: 1/1){
-  body::before{ background-image:url("bg-landscape.jpg"); }
+  body::before{ background-image:linear-gradient(rgba(250,246,239,.65),rgba(250,246,239,.65)), url("bg-landscape.jpg"); }
 }
 .he{font-family:"David Libre",Georgia,serif; direction:rtl}
 .wrap{width:100%; max-width:560px; display:flex; flex-direction:column; gap:12px; flex:1}
 header{display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--brick); padding-bottom:8px}
+.panel{
+  background:rgba(255,252,246,.88); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border:1px solid rgba(139,46,46,.22); border-radius:12px; padding:12px;
+}
 .logo{width:34px; height:34px; border-radius:8px; border:1px solid rgba(139,46,46,.35)}
 .logo-sm{width:28px; height:28px}
 header h1{margin:0; font-size:20px; font-weight:700; flex:1}
@@ -58,7 +64,7 @@ header .count{color:var(--mut); font-size:12.5px; text-align:right}
 .bar{height:6px; background:#eee3da; border-radius:3px; overflow:hidden; display:flex}
 .bar i{display:block; height:100%; background:var(--green)}
 .bar.b2 i{background:#7fae93}
-.syncBox{border-top:1.5px dashed var(--line); padding-top:12px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:var(--mut)}
+.syncBox{background:rgba(255,252,246,.88); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border:1px solid rgba(139,46,46,.22); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:var(--mut)}
 .syncBox .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
 .syncBox input{flex:1; min-width:160px; border:1px solid var(--line); border-radius:6px; padding:8px 10px; font-size:13px; background:rgba(255,255,255,.85)}
 .syncBox button{border:1.5px solid var(--brick); background:none; color:var(--brick); border-radius:6px; padding:7px 12px; font-size:13px; font-weight:600; cursor:pointer}
@@ -109,7 +115,7 @@ header .count{color:var(--mut); font-size:12.5px; text-align:right}
 .answers .no{background:var(--red)}
 .answers .yes{background:var(--green)}
 .answers button:active{filter:brightness(.9)}
-.stats{display:flex; justify-content:center; gap:18px; font-size:13.5px; color:var(--mut)}
+.stats{display:flex; justify-content:center; gap:18px; font-size:13.5px; color:var(--mut); background:rgba(255,252,246,.75); border-radius:10px; padding:7px 10px; align-self:center}
 .stats b{color:var(--ink)}
 .done{display:none; flex-direction:column; align-items:center; gap:14px; text-align:center}
 .done.show{display:flex}
@@ -125,12 +131,14 @@ button:focus-visible{outline:3px solid var(--green); outline-offset:2px}
 
   <!-- ======== МЕНЮ ======== -->
   <div id="viewMenu">
+    <div class="panel">
     <header>
       <img src="logo-64.png" alt="" class="logo">
       <h1><span class="he">עִבְרִית</span> · карточки</h1>
       <span class="count" id="menuCount"></span>
       <button type="button" id="dbRefresh" title="Обновить базу">⟳</button>
     </header>
+    </div>
     <div style="height:12px"></div>
     <div class="lessonList" id="lessonList"></div>
     <div style="height:16px"></div>
@@ -147,6 +155,7 @@ button:focus-visible{outline:3px solid var(--green); outline-offset:2px}
 
   <!-- ======== ТРЕНИРОВКА ======== -->
   <div id="viewTrain" class="hidden">
+    <div class="panel">
     <header>
       <img src="logo-64.png" alt="" class="logo logo-sm">
       <button type="button" id="backBtn">← меню</button>
@@ -172,6 +181,7 @@ button:focus-visible{outline:3px solid var(--green); outline-offset:2px}
     <div class="progressLine" style="margin-top:8px">
       <span id="learnedLine"></span>
       <button type="button" id="resetBtn">сбросить прогресс</button>
+    </div>
     </div>
     <div class="stage">
       <div class="plate" id="plate">
