@@ -27,6 +27,7 @@ header h1{margin:0; font-size:20px; font-weight:700; flex:1}
 header h1 .he{color:var(--brick); font-size:24px}
 header .count{color:var(--mut); font-size:12.5px; text-align:right}
 #backBtn{border:1.5px solid var(--brick); background:none; color:var(--brick); border-radius:8px; padding:7px 12px; font-size:14px; font-weight:700; cursor:pointer}
+#dbRefresh{border:1.5px solid var(--brick); background:none; color:var(--brick); border-radius:8px; padding:5px 10px; font-size:16px; font-weight:700; cursor:pointer; line-height:1}
 
 /* ---- меню ---- */
 .lessonList{display:flex; flex-direction:column; gap:12px}
@@ -113,6 +114,7 @@ button:focus-visible{outline:3px solid var(--green); outline-offset:2px}
     <header>
       <h1><span class="he">עִבְרִית</span> · карточки</h1>
       <span class="count" id="menuCount"></span>
+      <button type="button" id="dbRefresh" title="Обновить базу">⟳</button>
     </header>
     <div style="height:12px"></div>
     <div class="lessonList" id="lessonList"></div>
@@ -174,9 +176,9 @@ button:focus-visible{outline:3px solid var(--green); outline-offset:2px}
 
 </div>
 
-<script src="words.js"></script>
 <script>
 "use strict";
+function startApp(){
 var DB = window.WORDS_DB || {lessons:[]};
 var LESSONS = DB.lessons || [];
 
@@ -556,6 +558,12 @@ document.addEventListener("keydown",function(e){
   if(e.key==="ArrowRight"||e.key==="2") answer(true);
 });
 
+$("dbRefresh").addEventListener("click",function(){
+  var b=this; b.textContent="…";
+  try{ location.replace(location.pathname+"?u="+Date.now()); }
+  catch(e){ location.reload(); }
+});
+
 /* ---------- старт ---------- */
 (function init(){
   var st=loadLocal();
@@ -578,6 +586,18 @@ document.addEventListener("keydown",function(e){
   buildMenu();
   showView("menu");
   ghPull().then(function(){ if(view==="menu") buildMenu(); });
+})();
+} /* конец startApp */
+
+(function boot(){
+  fetch("words.js?v="+Date.now(), {cache:"no-store"})
+    .then(function(r){ if(!r.ok) throw 0; return r.text(); })
+    .then(function(t){ (new Function(t))(); startApp(); })
+    .catch(function(){
+      var sc=document.createElement("script");
+      sc.src="words.js"; sc.onload=startApp; sc.onerror=startApp;
+      document.head.appendChild(sc);
+    });
 })();
 </script>
 </body>
