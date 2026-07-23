@@ -322,8 +322,12 @@ function updSyncUI(ok){
 /* ---------- прогресс ---------- */
 function pkW(w,d){ return w.lessonId+"|"+w.h+"|"+d; }
 function pkOld(w,d){ return stripNikud(w.h)+"_"+d; }
-function streak(w,d){ var p=prog[pkW(w,d)]; return p?(p.v|0):0; }
-function isLearnedW(w,d){ return streak(w,d)>=2; }
+function isLearnedW(w,d){
+  var p=prog[pkW(w,d)];
+  if(!p) return false;
+  var v=p.v|0;
+  return p.f ? v>=2 : v>=1;   /* без ошибок — 1 ответ; после ошибки — 2 подряд */
+}
 function lessonWords(id){ return id==="__all" ? W : W.filter(function(w){ return w.lessonId===id; }); }
 function learnedIn(id,d){
   var n=0; lessonWords(id).forEach(function(w){ if(isLearnedW(w,d)) n++; });
@@ -476,15 +480,23 @@ function flip(){
 function answer(ok){
   if(!flipped||!queue.length||view!=="train") return;
   var cur=queue.shift(), key=pkW(cur.w,cur.d), now=Date.now();
+  var p=prog[key]||{v:0,ts:0};
   if(ok){
-    known++;
-    var v=(prog[key]&&prog[key].v|0)||0;
-    prog[key]={v:v+1, ts:now};
+    cur.s=(cur.s|0)+1;
+    p.v=(p.v|0)+1; p.ts=now; prog[key]=p;
+    if(cur.f && cur.s<2){
+      /* была ошибка — нужен второй верный подряд, карточка вернётся */
+      var pos=Math.min(queue.length, 3+Math.floor(Math.random()*3));
+      queue.splice(pos,0,cur);
+    } else {
+      known++;
+    }
   } else {
     reps++;
-    prog[key]={v:0, ts:now};
-    var pos=Math.min(queue.length, 3+Math.floor(Math.random()*3));
-    queue.splice(pos,0,cur);
+    cur.f=1; cur.s=0;
+    p.v=0; p.f=1; p.ts=now; prog[key]=p;
+    var pos2=Math.min(queue.length, 3+Math.floor(Math.random()*3));
+    queue.splice(pos2,0,cur);
   }
   saveLocal(); scheduleSync();
   updLearnedLine();
