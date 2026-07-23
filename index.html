@@ -241,19 +241,15 @@ function mergeProg(remote){
 }
 async function ghPull(){
   var tok=ghToken();
+  if(!tok) return true;   /* без токена — только локальный прогресс, чужой не подтягиваем */
   try{
     var data=null;
-    if(tok){
-      var g=await fetch("https://api.github.com/repos/"+GH.owner+"/"+GH.repo+"/contents/"+GH.path+"?ref="+GH.branch,
-        {headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json"}});
-      if(g.ok){
-        var j=await g.json();
-        data=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))));
-      } else if(g.status!==404){ return false; }
-    } else {
-      var r=await fetch("https://raw.githubusercontent.com/"+GH.owner+"/"+GH.repo+"/"+GH.branch+"/"+GH.path+"?t="+Date.now());
-      if(r.ok) data=await r.json(); else if(r.status!==404) return false;
-    }
+    var g=await fetch("https://api.github.com/repos/"+GH.owner+"/"+GH.repo+"/contents/"+GH.path+"?ref="+GH.branch,
+      {headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json"}});
+    if(g.ok){
+      var j=await g.json();
+      data=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))));
+    } else if(g.status!==404){ return false; }
     if(data && data.prog){ mergeProg(data.prog); saveLocal(); }
     return true;
   }catch(e){ return false; }
