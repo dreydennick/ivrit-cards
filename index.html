@@ -331,7 +331,7 @@ function buildMenu(){
     list.appendChild(b);
   }
   if(LESSONS.length>1) lessonCard("__all","ВСЕ","Все уроки вместе");
-  LESSONS.slice().reverse().forEach(function(L){ lessonCard(L.id, L.date, L.topic); });
+  LESSONS.slice().sort(function(a,b){ return b.id.localeCompare(a.id); }).forEach(function(L){ lessonCard(L.id, L.date, L.topic); });
   updSyncUI();
 }
 
