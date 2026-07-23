@@ -304,7 +304,8 @@ function updSyncUI(ok){
 }
 
 /* ---------- прогресс ---------- */
-function pkW(w,d){ return stripNikud(w.h)+"_"+d; }
+function pkW(w,d){ return w.lessonId+"|"+w.h+"|"+d; }
+function pkOld(w,d){ return stripNikud(w.h)+"_"+d; }
 function streak(w,d){ var p=prog[pkW(w,d)]; return p?(p.v|0):0; }
 function isLearnedW(w,d){ return streak(w,d)>=2; }
 function lessonWords(id){ return id==="__all" ? W : W.filter(function(w){ return w.lessonId===id; }); }
@@ -564,6 +565,13 @@ document.addEventListener("keydown",function(e){
     if(st.pool) pool=st.pool;
     if(st.prog) prog=st.prog;
   }
+  /* миграция прогресса со старых ключей (без огласовок) */
+  W.forEach(function(w){
+    ["he","ru"].forEach(function(d){
+      var nk=pkW(w,d), ok=pkOld(w,d);
+      if(!prog[nk] && prog[ok]) prog[nk]=prog[ok];
+    });
+  });
   segBtns.forEach(function(x){ x.className=x.getAttribute("data-d")===dir?"on":""; });
   poolBtns.forEach(function(x){ x.className=x.getAttribute("data-p")===pool?"on":""; });
   var t=$("nikudTgl"); t.className=nikud?"on":""; t.setAttribute("aria-checked",nikud);
