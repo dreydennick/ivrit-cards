@@ -482,10 +482,9 @@ function answer(ok){
   var cur=queue.shift(), key=pkW(cur.w,cur.d), now=Date.now();
   var p=prog[key]||{v:0,ts:0};
   if(ok){
-    cur.s=(cur.s|0)+1;
     p.v=(p.v|0)+1; p.ts=now; prog[key]=p;
-    if(cur.f && cur.s<2){
-      /* была ошибка — нужен второй верный подряд, карточка вернётся */
+    if(p.f && (p.v|0)<2){
+      /* была ошибка — нужен второй верный (не обязательно подряд) */
       var pos=Math.min(queue.length, 3+Math.floor(Math.random()*3));
       queue.splice(pos,0,cur);
     } else {
@@ -493,8 +492,7 @@ function answer(ok){
     }
   } else {
     reps++;
-    cur.f=1; cur.s=0;
-    p.v=0; p.f=1; p.ts=now; prog[key]=p;
+    p.f=1; p.ts=now; prog[key]=p;   /* счёт верных не сбрасываем */
     var pos2=Math.min(queue.length, 3+Math.floor(Math.random()*3));
     queue.splice(pos2,0,cur);
   }
