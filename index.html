@@ -700,18 +700,34 @@ function renderRound(){
   var cur=rQ[rI], w=cur.w, st=$("ritStage");
   st.innerHTML="";
   var panel=document.createElement("div"); panel.className="ritPanel"; st.appendChild(panel);
-  function step(ok){
+  function step(ok, html){
     cur.ok=ok;
     rRes.push(cur);
-    setTimeout(function(){ rI++; renderRound(); }, ok?800:1400);
+    var ex=document.createElement("div");
+    ex.className="ritPanel"; ex.style.marginTop="10px";
+    ex.innerHTML=(html||"")+'<div class="ritCtl"><button type="button" id="ritNext">далее →</button></div>';
+    panel.appendChild(ex);
+    var nb=document.getElementById("ritNext");
+    nb.addEventListener("click",function(){ rI++; renderRound(); });
+    try{ nb.scrollIntoView({block:"nearest"}); }catch(e){}
   }
+  function wordLine(x){ return '<b>'+heTxt(x.h)+'</b> — <i>'+x.t+'</i> — '+x.r; }
+  function sentPair(raw){ return (typeof raw==="string") ? [raw,""] : raw; }
   if(cur.type==="ctx"){
-    var sents=SENT[w.h], sent=sents[Math.floor(Math.random()*sents.length)];
-    var dis=pickDistr(w,"h");
-    var opts=dis.map(function(x){return x.h;}); opts.push(w.h);
-    opts.sort(function(){return Math.random()-.5;});
-    panel.innerHTML='<div class="ritQ">Какое слово пропущено?</div><div class="ritHe">'+sent+'</div>';
-    optBtns(panel, opts.map(heTxt), true, opts.indexOf(w.h), function(ok){ ritMark(w,"ru",ok); step(ok); });
+    var pr=sentPair(SENT[w.h][Math.floor(Math.random()*SENT[w.h].length)]);
+    var ow=pickDistr(w,"h"); ow.push(w);
+    ow.sort(function(){return Math.random()-.5;});
+    panel.innerHTML='<div class="ritQ">Какое слово пропущено?</div><div class="ritHe">'+pr[0]+'</div>';
+    optBtns(panel, ow.map(function(x){return heTxt(x.h);}), true, ow.indexOf(w), function(ok){
+      ritMark(w,"ru",ok);
+      var rows=ow.map(function(x){
+        return '<div class="row"><span class="rh">'+heTxt(x.h)+'</span><span>'+x.r+(x===w?" ✓":"")+'</span></div>';
+      }).join("");
+      var html='<div class="ritQ">Пропущено: '+wordLine(w)+'</div>'+
+        (pr[1]?'<div class="ritQ" style="color:var(--mut)">«'+pr[1]+'»</div>':"")+
+        '<div class="ritRep">'+rows+'</div>';
+      step(ok, html);
+    });
   } else if(cur.type==="asm"){
     var token=asmToken(w);
     panel.innerHTML='<div class="ritQ">Собери на иврите: <b>'+w.r+'</b></div><div class="slots" id="asmSlots">·</div>';
@@ -730,7 +746,7 @@ function renderRound(){
         if(curS.length===token.length){
           if(curS===token){
             $("asmSlots").style.color="var(--green)";
-            ritMark(w,"ru",true); step(true);
+            ritMark(w,"ru",true); step(true, '<div class="ritQ">'+wordLine(w)+'</div>');
           } else {
             cur.tries++;
             if(cur.tries<2){
@@ -742,7 +758,7 @@ function renderRound(){
             } else {
               $("asmSlots").textContent=token;
               $("asmSlots").style.color="var(--red)";
-              ritMark(w,"ru",false); step(false);
+              ritMark(w,"ru",false); step(false, '<div class="ritQ">'+wordLine(w)+'</div>');
             }
           }
         }
@@ -760,7 +776,16 @@ function renderRound(){
     var opts2=dis2.map(function(x){return x.r;}); opts2.push(w.r);
     opts2.sort(function(){return Math.random()-.5;});
     panel.innerHTML='<div class="ritQ">Что это значит?</div><div class="ritHe">'+heTxt(w.h)+'</div>';
-    optBtns(panel, opts2, false, opts2.indexOf(w.r), function(ok){ ritMark(w,"he",ok); step(ok); });
+    optBtns(panel, opts2, false, opts2.indexOf(w.r), function(ok){
+      ritMark(w,"he",ok);
+      var html='<div class="ritQ">'+wordLine(w)+'</div>';
+      if(SENT[w.h] && SENT[w.h].length){
+        var pr2=sentPair(SENT[w.h][0]);
+        html+='<div class="ritHe" style="font-size:22px">'+pr2[0]+'</div>'+
+          (pr2[1]?'<div class="ritQ" style="color:var(--mut)">«'+pr2[1]+'»</div>':"");
+      }
+      step(ok, html);
+    });
   }
 }
 function renderReport(){ finishRitual(false); }
