@@ -124,6 +124,29 @@ header .count{color:var(--mut); font-size:12.5px; text-align:right}
 .done .he{font-size:44px; color:var(--brick); font-weight:700}
 .done p{margin:0; font-size:17px}
 .done button{border:1.5px solid var(--brick); background:var(--brick); color:#fff; border-radius:8px; padding:12px 26px; font-size:16px; font-weight:700; cursor:pointer}
+/* --- ритуал --- */
+.ritCard{background:var(--brick) !important; -webkit-backdrop-filter:none; backdrop-filter:none}
+.ritCard .topic{color:#fff !important}
+.ritCard .meta{color:rgba(255,255,255,.88)}
+.ritCard .date{background:#fff; color:var(--brick)}
+.ritCard[disabled]{opacity:.55; cursor:default}
+.ritQ{font-size:16.5px; text-align:center; padding:4px 2px; color:var(--ink)}
+.ritHe{font-family:"David Libre",Georgia,serif; direction:rtl; font-size:29px; line-height:1.55; text-align:center}
+.optGrid{display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%}
+.optGrid button{border:1.5px solid var(--brick); background:rgba(255,253,249,.94); color:var(--ink); border-radius:8px; padding:12px 8px; font-size:15px; cursor:pointer; min-height:52px}
+.optGrid button.heb{font-family:"David Libre",Georgia,serif; font-size:22px; direction:rtl}
+.optGrid button.good{background:var(--green) !important; color:#fff; border-color:var(--green)}
+.optGrid button.wrong{background:var(--red) !important; color:#fff; border-color:var(--red)}
+.slots{font-family:"David Libre",Georgia,serif; direction:rtl; font-size:36px; min-height:54px; text-align:center; letter-spacing:2px; color:var(--ink)}
+.tiles{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; direction:rtl}
+.tiles button{font-family:"David Libre",Georgia,serif; font-size:24px; padding:8px 14px; border:1.5px solid var(--brick); background:rgba(255,253,249,.96); border-radius:8px; cursor:pointer}
+.tiles button:disabled{opacity:.3}
+.ritCtl{display:flex; gap:8px; justify-content:center; flex-wrap:wrap}
+.ritCtl button{border:1.5px solid var(--brick); background:none; color:var(--brick); border-radius:8px; padding:9px 14px; font-weight:700; cursor:pointer}
+.ritRep{display:flex; flex-direction:column; gap:6px; font-size:15px; width:100%}
+.ritRep .row{display:flex; justify-content:space-between; align-items:center; gap:10px; background:rgba(255,253,249,.85); border-radius:8px; padding:8px 10px}
+.ritRep .rh{font-family:"David Libre",Georgia,serif; font-size:20px; direction:rtl}
+.ritPanel{display:flex; flex-direction:column; gap:14px; align-items:center; text-align:center}
 button:focus-visible{outline:3px solid var(--green); outline-offset:2px}
 @media (max-height:700px){
   #card{min-height:220px}
@@ -207,6 +230,18 @@ button:focus-visible{outline:3px solid var(--green); outline-offset:2px}
     </div>
   </div>
 
+  <!-- ======== РИТУАЛ ======== -->
+  <div id="viewRitual" class="hidden">
+    <header>
+      <img src="logo-64.png" alt="" class="logo logo-sm">
+      <button type="button" id="ritBack">← меню</button>
+      <h1 style="font-size:16px">Ритуал · разбор</h1>
+      <span class="count" id="ritCount"></span>
+    </header>
+    <div style="height:12px"></div>
+    <div class="stage" id="ritStage"></div>
+  </div>
+
 </div>
 
 <script>
@@ -223,6 +258,7 @@ LESSONS.forEach(function(L){
   });
 });
 
+var SENT = window.SENT_DB || {};
 var KEY="ivrit-cards-v3", KEY_OLD="ivrit-cards-v2", TOKKEY="ivrit-gh-token";
 var GH={owner:"dreydennick", repo:"ivrit-cards", path:"progress.json", branch:"main"};
 
@@ -233,6 +269,7 @@ function b64u(s){ return btoa(unescape(encodeURIComponent(s))); }
 /* ---------- состояние ---------- */
 var dir="he", nikud=true, pool="all";
 var prog={};            // ключ слово_напр -> {v:серия, ts:время}
+var rit={last:"", snap:{}, clean:{}};   // ритуал: дата, снапшот счётчиков, чистые серии
 var currentLesson=null; // id урока или "__all"
 var activeNames={};     // секции текущего урока
 var queue=[], known=0, reps=0, deckSize=0, flipped=false, firstCard=true;
@@ -258,13 +295,16 @@ function loadLocal(){
   return null;
 }
 function saveLocal(){
-  lsSet(KEY, JSON.stringify({dir:dir, nikud:nikud, pool:pool, prog:prog}));
+  lsSet(KEY, JSON.stringify({dir:dir, nikud:nikud, pool:pool, prog:prog, rit:rit}));
 }
 
 /* ---------- синхронизация с GitHub ---------- */
 function ghToken(){ return lsGet(TOKKEY)||""; }
 var syncTimer=null, lastSync=0;
 
+function ritMerge(r){
+  if(r && r.last && (!rit.last || r.last>rit.last)) rit=r;
+}
 function mergeProg(remote){
   if(!remote) return;
   for(var k in remote){
@@ -283,7 +323,7 @@ async function ghPull(){
       var j=await g.json();
       data=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))));
     } else if(g.status!==404){ return false; }
-    if(data && data.prog){ mergeProg(data.prog); saveLocal(); }
+    if(data){ if(data.prog) mergeProg(data.prog); ritMerge(data.rit); saveLocal(); }
     return true;
   }catch(e){ return false; }
 }
@@ -295,10 +335,10 @@ async function ghPush(){
     var g=await fetch(url+"?ref="+GH.branch,{headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json"}});
     if(g.ok){
       var j=await g.json(); sha=j.sha;
-      try{ var remote=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,""))))); mergeProg(remote.prog); }catch(e){}
+      try{ var remote=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,""))))); mergeProg(remote.prog); ritMerge(remote.rit); }catch(e){}
     }
     async function doPut(shaVal){
-      var body={message:"sync progress", branch:GH.branch, content:b64u(JSON.stringify({prog:prog, ts:Date.now()}))};
+      var body={message:"sync progress", branch:GH.branch, content:b64u(JSON.stringify({prog:prog, rit:rit, ts:Date.now()}))};
       if(shaVal) body.sha=shaVal;
       return await fetch(url,{method:"PUT",
         headers:{Authorization:"token "+tok, Accept:"application/vnd.github+json", "Content-Type":"application/json"},
@@ -368,6 +408,18 @@ function learnedIn(id,d){
 function buildMenu(){
   $("menuCount").textContent=LESSONS.length+" ур. · "+W.length+" слов";
   var list=$("lessonList"); list.innerHTML="";
+  (function(){
+    var stt=ritualStatus();
+    var rc=document.createElement("button");
+    rc.type="button"; rc.className="lesson ritCard";
+    var info = stt.done ? "выполнен ✓ · следующий: "+stt.nextLabel
+             : "доступен — жми";
+    rc.innerHTML='<div class="top"><span class="date">РИТУАЛ</span><span class="topic">Разбор трудных слов</span></div>'+
+      '<div class="meta">ср · сб · '+info+'</div>';
+    if(stt.available){ rc.addEventListener("click", startRitual); }
+    else { rc.disabled=true; }
+    list.appendChild(rc);
+  })();
   function lessonCard(id,date,topic){
     var ws=lessonWords(id), n=ws.length;
     var lh=learnedIn(id,"he"), lr=learnedIn(id,"ru");
@@ -389,6 +441,7 @@ function showView(v){
   view=v;
   $("viewMenu").classList.toggle("hidden", v!=="menu");
   $("viewTrain").classList.toggle("hidden", v!=="train");
+  $("viewRitual").classList.toggle("hidden", v!=="ritual");
   window.scrollTo(0,0);
 }
 
@@ -551,8 +604,202 @@ function showDone(empty){
   if(!empty){ ghPush().then(updSyncUI); }
 }
 
+/* ---------- РИТУАЛ ---------- */
+function d2n(n){ return (n<10?"0":"")+n; }
+function fmtD(d){ return d.getFullYear()+"-"+d2n(d.getMonth()+1)+"-"+d2n(d.getDate()); }
+function lastDue(){
+  var d=new Date();
+  for(var i=0;i<7;i++){ var g=d.getDay(); if(g===3||g===6) return fmtD(d); d.setDate(d.getDate()-1); }
+  return fmtD(new Date());
+}
+function nextDueLabel(){
+  var d=new Date(); d.setDate(d.getDate()+1);
+  for(var i=0;i<8;i++){ var g=d.getDay();
+    if(g===3||g===6) return (g===3?"ср":"сб")+" "+d2n(d.getDate())+"."+d2n(d.getMonth()+1);
+    d.setDate(d.getDate()+1); }
+  return "";
+}
+function ritualStatus(){
+  var due=lastDue(), done=!!rit.last && rit.last>=due;
+  return {available:!done, done:done, nextLabel:nextDueLabel()};
+}
+function wKeyBase(w){ return w.lessonId+"|"+stripNikud(w.h); }
+function wTotals(w){
+  var a=prog[pkW(w,"he")]||{}, b=prog[pkW(w,"ru")]||{};
+  return { v:(a.v|0)+(b.v|0), e:(a.e|0)+(b.e|0), f:(a.f?1:0)+(b.f?1:0) };
+}
+function asmToken(w){
+  var t=stripNikud(w.h).split(/[ \/]/)[0].replace(/[^\u05D0-\u05EA]/g,"");
+  return (t.length>=3 && t.length<=8) ? t : "";
+}
+function buildRitualDeck(){
+  var scored=[];
+  W.forEach(function(w){
+    var t=wTotals(w), sn=rit.snap[wKeyBase(w)]||{v:0,e:0};
+    var de=Math.max(0, t.e-(sn.e|0));
+    var learned=isLearnedW(w,"he")&&isLearnedW(w,"ru");
+    var cl=rit.clean[wKeyBase(w)]|0;
+    var score=de*3 + t.f + (learned?0:2) - cl*2;
+    if(t.v===0&&t.e===0) score-=1;
+    scored.push({w:w, score:score});
+  });
+  scored.sort(function(a,b){ return b.score-a.score || Math.random()-.5; });
+  var pick=scored.filter(function(x){return x.score>0;}).slice(0,12).map(function(x){return x.w;});
+  if(pick.length<6) pick=scored.slice(0,8).map(function(x){return x.w;});
+  return pick;
+}
+function pickDistr(w, field){
+  function pool(f){ return W.filter(function(x){ return x!==w && f(x) && x[field]!==w[field]; }); }
+  var c=pool(function(x){return x.lessonId===w.lessonId && x.secName===w.secName;});
+  if(c.length<3) c=c.concat(pool(function(x){return x.lessonId===w.lessonId;}));
+  if(c.length<3) c=c.concat(pool(function(){return true;}));
+  c.sort(function(){return Math.random()-.5;});
+  var seen={}, out=[];
+  for(var i=0;i<c.length&&out.length<3;i++){ var v=c[i][field]; if(!seen[v]){seen[v]=1;out.push(c[i]);} }
+  return out;
+}
+var rQ=[], rI=0, rRes=[];
+function startRitual(){
+  var deck=buildRitualDeck();
+  showView("ritual");
+  if(!deck.length){
+    $("ritStage").innerHTML='<div class="ritPanel"><div class="ritHe">!כָּל הַכָּבוֹד</div><p>Врагов нет — все слова в порядке.</p></div>';
+    finishRitual(true); return;
+  }
+  var ctxN=0, asmN=0;
+  rQ=deck.map(function(w){
+    var type="duel";
+    if(SENT[w.h] && SENT[w.h].length && ctxN<5){ type="ctx"; ctxN++; }
+    else if(asmToken(w) && asmN<4){ type="asm"; asmN++; }
+    return {w:w, type:type, ok:null, tries:0};
+  });
+  rQ.sort(function(){return Math.random()-.5;});
+  rI=0; rRes=[];
+  renderRound();
+}
+function ritProg(){ $("ritCount").textContent=(rI+1)+" / "+rQ.length; }
+function ritMark(w, dirn, ok){
+  var key=pkW(w,dirn), now=Date.now(), p=prog[key]||{v:0,ts:0};
+  if(ok){ p.v=(p.v|0)+1; } else { p.e=(p.e|0)+1; p.f=1; }
+  p.ts=now; prog[key]=p;
+  saveLocal(); scheduleSync();
+}
+function optBtns(host, items, isHeb, rightIdx, done){
+  var grid=document.createElement("div"); grid.className="optGrid";
+  items.forEach(function(txt,idx){
+    var b=document.createElement("button"); b.type="button";
+    b.className=isHeb?"heb":""; b.textContent=txt;
+    b.addEventListener("click",function(){
+      if(grid.dataset.lock) return;
+      grid.dataset.lock="1";
+      var ok=(idx===rightIdx);
+      grid.children[rightIdx].classList.add("good");
+      if(!ok) b.classList.add("wrong");
+      done(ok);
+    });
+    grid.appendChild(b);
+  });
+  host.appendChild(grid);
+}
+function renderRound(){
+  if(rI>=rQ.length){ renderReport(); return; }
+  ritProg();
+  var cur=rQ[rI], w=cur.w, st=$("ritStage");
+  st.innerHTML="";
+  var panel=document.createElement("div"); panel.className="ritPanel"; st.appendChild(panel);
+  function step(ok){
+    cur.ok=ok;
+    rRes.push(cur);
+    setTimeout(function(){ rI++; renderRound(); }, ok?800:1400);
+  }
+  if(cur.type==="ctx"){
+    var sents=SENT[w.h], sent=sents[Math.floor(Math.random()*sents.length)];
+    var dis=pickDistr(w,"h");
+    var opts=dis.map(function(x){return x.h;}); opts.push(w.h);
+    opts.sort(function(){return Math.random()-.5;});
+    panel.innerHTML='<div class="ritQ">Какое слово пропущено?</div><div class="ritHe">'+sent+'</div>';
+    optBtns(panel, opts.map(heTxt), true, opts.indexOf(w.h), function(ok){ ritMark(w,"ru",ok); step(ok); });
+  } else if(cur.type==="asm"){
+    var token=asmToken(w);
+    panel.innerHTML='<div class="ritQ">Собери слово: <b>'+w.r+'</b> · <i>'+w.t+'</i></div><div class="slots" id="asmSlots">·</div>';
+    var tiles=document.createElement("div"); tiles.className="tiles"; panel.appendChild(tiles);
+    var ctl=document.createElement("div"); ctl.className="ritCtl"; panel.appendChild(ctl);
+    var back=document.createElement("button"); back.type="button"; back.textContent="⌫ стереть"; ctl.appendChild(back);
+    var curS="", letters=token.split("");
+    letters.sort(function(){return Math.random()-.5;});
+    var btns=[];
+    function upd(){ $("asmSlots").textContent = curS || "·"; }
+    letters.forEach(function(L){
+      var b=document.createElement("button"); b.type="button"; b.textContent=L;
+      b.addEventListener("click",function(){
+        if(b.disabled) return;
+        b.disabled=true; curS+=L; upd();
+        if(curS.length===token.length){
+          if(curS===token){
+            $("asmSlots").style.color="var(--green)";
+            ritMark(w,"ru",true); step(true);
+          } else {
+            cur.tries++;
+            if(cur.tries<2){
+              $("asmSlots").style.color="var(--red)";
+              setTimeout(function(){
+                curS=""; upd(); $("asmSlots").style.color="";
+                btns.forEach(function(x){x.disabled=false;});
+              },700);
+            } else {
+              $("asmSlots").textContent=token;
+              $("asmSlots").style.color="var(--red)";
+              ritMark(w,"ru",false); step(false);
+            }
+          }
+        }
+      });
+      tiles.appendChild(b); btns.push(b);
+    });
+    back.addEventListener("click",function(){
+      if(!curS) return;
+      var last=curS.slice(-1); curS=curS.slice(0,-1); upd();
+      for(var i=btns.length-1;i>=0;i--){ if(btns[i].disabled && btns[i].textContent===last){ btns[i].disabled=false; break; } }
+    });
+    upd();
+  } else { /* duel */
+    var dis2=pickDistr(w,"r");
+    var opts2=dis2.map(function(x){return x.r;}); opts2.push(w.r);
+    opts2.sort(function(){return Math.random()-.5;});
+    panel.innerHTML='<div class="ritQ">Что это значит?</div><div class="ritHe">'+heTxt(w.h)+'</div>';
+    optBtns(panel, opts2, false, opts2.indexOf(w.r), function(ok){ ritMark(w,"he",ok); step(ok); });
+  }
+}
+function renderReport(){ finishRitual(false); }
+function finishRitual(empty){
+  /* снапшот и чистые серии */
+  W.forEach(function(w){
+    var t=wTotals(w);
+    rit.snap[wKeyBase(w)]={v:t.v, e:t.e};
+  });
+  rRes.forEach(function(r){
+    var k=wKeyBase(r.w);
+    rit.clean[k] = r.ok ? ((rit.clean[k]|0)+1) : 0;
+  });
+  rit.last=lastDue();
+  saveLocal(); ghPush().then(updSyncUI);
+  if(empty) return;
+  var good=rRes.filter(function(r){return r.ok;}).length;
+  var st=$("ritStage");
+  var rows=rRes.map(function(r){
+    return '<div class="row"><span class="rh">'+heTxt(r.w.h)+'</span><span>'+r.w.r+'</span><b style="color:'+(r.ok?'var(--green)':'var(--red)')+'">'+(r.ok?'✓':'✗')+'</b></div>';
+  }).join("");
+  st.innerHTML='<div class="ritPanel"><div class="ritHe">!סוֹף</div>'+
+    '<p>Разбор выполнен: <b>'+good+'</b> из <b>'+rRes.length+'</b> · следующий: '+nextDueLabel()+'</p>'+
+    '<div class="ritRep">'+rows+'</div>'+
+    '<div class="ritCtl"><button type="button" id="ritDone">в меню</button></div></div>';
+  $("ritCount").textContent="";
+  $("ritDone").addEventListener("click",function(){ showView("menu"); buildMenu(); });
+}
+
 /* ---------- события ---------- */
 card.addEventListener("click", flip);
+$("ritBack").addEventListener("click",function(){ showView("menu"); buildMenu(); });
 $("btnNo").addEventListener("click",function(){ answer(false); });
 $("btnYes").addEventListener("click",function(){ answer(true); });
 $("backBtn").addEventListener("click",function(){
@@ -627,6 +874,7 @@ $("dbRefresh").addEventListener("click",function(){
     if(typeof st.nikud==="boolean") nikud=st.nikud;
     if(st.pool) pool=st.pool;
     if(st.prog) prog=st.prog;
+    if(st.rit) rit=st.rit;
   }
   /* миграция прогресса со старых ключей (без огласовок) */
   W.forEach(function(w){
@@ -645,12 +893,22 @@ $("dbRefresh").addEventListener("click",function(){
 } /* конец startApp */
 
 (function boot(){
+  function go(){
+    fetch("sentences.js?v="+Date.now(), {cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw 0; return r.text(); })
+      .then(function(t){ try{(new Function(t))();}catch(e){} startApp(); })
+      .catch(function(){
+        var sc=document.createElement("script");
+        sc.src="sentences.js"; sc.onload=startApp; sc.onerror=startApp;
+        document.head.appendChild(sc);
+      });
+  }
   fetch("words.js?v="+Date.now(), {cache:"no-store"})
     .then(function(r){ if(!r.ok) throw 0; return r.text(); })
-    .then(function(t){ (new Function(t))(); startApp(); })
+    .then(function(t){ (new Function(t))(); go(); })
     .catch(function(){
       var sc=document.createElement("script");
-      sc.src="words.js"; sc.onload=startApp; sc.onerror=startApp;
+      sc.src="words.js"; sc.onload=go; sc.onerror=go;
       document.head.appendChild(sc);
     });
 })();
