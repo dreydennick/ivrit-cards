@@ -734,7 +734,7 @@ function renderRound(){
     var g1=optBtns(panel, ow.map(function(x){return heTxt(x.h);}), true, ow.indexOf(w), function(ok){
       if(ok) ritMark(w,"ru",true);
       var rows=ow.map(function(x){
-        return '<div class="row"><span class="rh">'+heTxt(x.h)+'</span><span>'+x.r+(x===w?" ✓":"")+'</span></div>';
+        return '<div class="row"><span class="rh">'+heTxt(x.h)+'</span><span><i>'+x.t+'</i> · '+x.r+(x===w?" ✓":"")+'</span></div>';
       }).join("");
       var html='<div class="ritQ">Пропущено: '+wordLine(w)+'</div>'+
         (pr[1]?'<div class="ritQ" style="color:var(--mut)">«'+pr[1]+'»</div>':"")+
@@ -828,7 +828,7 @@ function finishRitual(empty){
   var good=rRes.filter(function(r){return r.ok;}).length;
   var st=$("ritStage");
   var rows=rRes.map(function(r){
-    return '<div class="row"><span class="rh">'+heTxt(r.w.h)+'</span><span>'+r.w.r+'</span><b style="color:'+(r.ok?'var(--green)':'var(--red)')+'">'+(r.ok?'✓':'✗')+'</b></div>';
+    return '<div class="row"><span class="rh">'+heTxt(r.w.h)+'</span><span><i>'+r.w.t+'</i> · '+r.w.r+'</span><b style="color:'+(r.ok?'var(--green)':'var(--red)')+'">'+(r.ok?'✓':'✗')+'</b></div>';
   }).join("");
   st.innerHTML='<div class="ritPanel"><div class="ritHe">!סוֹף</div>'+
     '<p>Разбор выполнен: <b>'+good+'</b> из <b>'+rRes.length+'</b> · следующий: '+nextDueLabel()+'</p>'+
