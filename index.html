@@ -725,7 +725,7 @@ function renderRound(){
     try{ nb.scrollIntoView({block:"nearest"}); }catch(e){}
   }
   function wordLine(x){ return '<b>'+heTxt(x.h)+'</b> — <i>'+x.t+'</i> — '+x.r; }
-  function sentPair(raw){ return (typeof raw==="string") ? [raw,""] : raw; }
+  function sentPair(raw){ return (typeof raw==="string") ? [raw,"",""] : [raw[0]||"", raw[1]||"", raw[2]||""]; }
   if(cur.type==="ctx"){
     var pr=sentPair(SENT[w.h][Math.floor(Math.random()*SENT[w.h].length)]);
     var ow=pickDistr(w,"h"); ow.push(w);
@@ -737,6 +737,7 @@ function renderRound(){
         return '<div class="row"><span class="rh">'+heTxt(x.h)+'</span><span><i>'+x.t+'</i> · '+x.r+(x===w?" ✓":"")+'</span></div>';
       }).join("");
       var html='<div class="ritQ">Пропущено: '+wordLine(w)+'</div>'+
+        (pr[2]?'<div class="ritQ" style="color:var(--brick)"><i>'+pr[2]+'</i></div>':"")+
         (pr[1]?'<div class="ritQ" style="color:var(--mut)">«'+pr[1]+'»</div>':"")+
         '<div class="ritRep">'+rows+'</div>';
       step(ok, html);
@@ -797,6 +798,7 @@ function renderRound(){
       if(SENT[w.h] && SENT[w.h].length){
         var pr2=sentPair(SENT[w.h][0]);
         html+='<div class="ritHe" style="font-size:22px">'+pr2[0]+'</div>'+
+          (pr2[2]?'<div class="ritQ" style="color:var(--brick)"><i>'+pr2[2]+'</i></div>':"")+
           (pr2[1]?'<div class="ritQ" style="color:var(--mut)">«'+pr2[1]+'»</div>':"");
       }
       step(ok, html);
