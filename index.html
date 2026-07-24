@@ -61,9 +61,10 @@ header .count{color:var(--mut); font-size:12.5px; text-align:right}
 .lesson .date{background:var(--brick); color:#fff; font-size:12px; font-weight:700; border-radius:4px; padding:3px 8px; letter-spacing:.03em}
 .lesson .topic{font-weight:700; font-size:16px; flex:1; color:var(--ink)}
 .lesson .meta{font-size:12.5px; color:var(--mut)}
-.bar{height:6px; background:#eee3da; border-radius:3px; overflow:hidden; display:flex}
-.bar i{display:block; height:100%; background:var(--green)}
-.bar.b2 i{background:#7fae93}
+.bar{height:7px; background:rgba(139,46,46,.16); border-radius:4px; position:relative}
+.bar .fill{position:absolute; left:0; top:0; bottom:0; border-radius:4px; background:var(--green); min-width:3px}
+.bar .fill[style*="width:0%"]{min-width:0}
+.bar.b2 .fill{background:#7fae93}
 .syncBox{background:rgba(255,252,246,.7); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border:1px solid rgba(139,46,46,.22); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:var(--mut)}
 .syncBox .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
 .syncBox input{flex:1; min-width:160px; border:1px solid var(--line); border-radius:6px; padding:8px 10px; font-size:13px; background:rgba(255,255,255,.8)}
@@ -373,8 +374,8 @@ function buildMenu(){
     b.type="button"; b.className="lesson";
     b.innerHTML='<div class="top"><span class="date">'+date+'</span><span class="topic">'+topic+'</span></div>'+
       '<div class="meta">'+n+' слов · выучено: עב→ру '+lh+' · ру→עב '+lr+'</div>'+
-      '<div class="bar"><i style="width:'+(n?Math.round(lh/n*100):0)+'%"></i></div>'+
-      '<div class="bar b2"><i style="width:'+(n?Math.round(lr/n*100):0)+'%"></i></div>';
+      '<div class="bar"><span class="fill" style="width:'+(n?Math.round(lh/n*100):0)+'%"></span></div>'+
+      '<div class="bar b2"><span class="fill" style="width:'+(n?Math.round(lr/n*100):0)+'%"></span></div>';
     b.addEventListener("click",function(){ openLesson(id, topic); });
     list.appendChild(b);
   }
