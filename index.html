@@ -325,7 +325,8 @@ async function syncNow(){
   var st=$("syncStatus"); st.textContent="синхронизация…"; st.className="";
   var okPull=await ghPull();
   var okPush=ghToken() ? await ghPush() : false;
-  updSyncUI(okPush==="auth" ? "auth" : (okPull && (okPush||!ghToken())));
+  /* если запись прошла — синк удался, даже если параллельный запрос отвалился */
+  updSyncUI(okPush==="auth" ? "auth" : (okPush===true ? true : (!ghToken() ? okPull : false)));
   if(view==="menu") buildMenu(); else { updLearnedLine(); }
 }
 function updSyncUI(ok){
