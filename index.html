@@ -415,7 +415,7 @@ function buildMenu(){
     var info = stt.done ? "выполнен ✓ · следующий: "+stt.nextLabel
              : "доступен — жми";
     rc.innerHTML='<div class="top"><span class="date">РИТУАЛ</span><span class="topic">Разбор трудных слов</span></div>'+
-      '<div class="meta">ср · сб · '+info+'</div>';
+      '<div class="meta">каждый день · '+info+'</div>';
     if(stt.available){ rc.addEventListener("click", startRitual); }
     else { rc.disabled=true; }
     list.appendChild(rc);
@@ -607,17 +607,10 @@ function showDone(empty){
 /* ---------- РИТУАЛ ---------- */
 function d2n(n){ return (n<10?"0":"")+n; }
 function fmtD(d){ return d.getFullYear()+"-"+d2n(d.getMonth()+1)+"-"+d2n(d.getDate()); }
-function lastDue(){
-  var d=new Date();
-  for(var i=0;i<7;i++){ var g=d.getDay(); if(g===3||g===6) return fmtD(d); d.setDate(d.getDate()-1); }
-  return fmtD(new Date());
-}
+function lastDue(){ return fmtD(new Date()); }
 function nextDueLabel(){
   var d=new Date(); d.setDate(d.getDate()+1);
-  for(var i=0;i<8;i++){ var g=d.getDay();
-    if(g===3||g===6) return (g===3?"ср":"сб")+" "+d2n(d.getDate())+"."+d2n(d.getMonth()+1);
-    d.setDate(d.getDate()+1); }
-  return "";
+  return "завтра, "+d2n(d.getDate())+"."+d2n(d.getMonth()+1);
 }
 function ritualStatus(){
   var due=lastDue(), done=!!rit.last && rit.last>=due;
@@ -721,7 +714,7 @@ function renderRound(){
     optBtns(panel, opts.map(heTxt), true, opts.indexOf(w.h), function(ok){ ritMark(w,"ru",ok); step(ok); });
   } else if(cur.type==="asm"){
     var token=asmToken(w);
-    panel.innerHTML='<div class="ritQ">Собери слово: <b>'+w.r+'</b> · <i>'+w.t+'</i></div><div class="slots" id="asmSlots">·</div>';
+    panel.innerHTML='<div class="ritQ">Собери на иврите: <b>'+w.r+'</b></div><div class="slots" id="asmSlots">·</div>';
     var tiles=document.createElement("div"); tiles.className="tiles"; panel.appendChild(tiles);
     var ctl=document.createElement("div"); ctl.className="ritCtl"; panel.appendChild(ctl);
     var back=document.createElement("button"); back.type="button"; back.textContent="⌫ стереть"; ctl.appendChild(back);
