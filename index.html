@@ -254,7 +254,7 @@ var LESSONS = DB.lessons || [];
 var W = [];
 LESSONS.forEach(function(L){
   (L.words||[]).forEach(function(w){
-    W.push({h:w.h, t:w.t, r:w.r, secName:(L.sections&&L.sections[w.s])||"", lessonId:L.id});
+    W.push({h:w.h, m:w.m, t:w.t, r:w.r, secName:(L.sections&&L.sections[w.s])||"", lessonId:L.id});
   });
 });
 
@@ -533,6 +533,7 @@ function buildDeck(){
   render();
 }
 function heTxt(s){ return nikud?s:stripNikud(s); }
+function heW(x){ return nikud ? x.h : (x.m || stripNikud(x.h)); }
 function render(){
   if(!queue.length){ showDone(false); return; }
   var cur=queue[0], w=cur.w;
@@ -542,12 +543,12 @@ function render(){
   var html;
   if(!flipped){
     html = cur.d==="he"
-      ? sec+mark+'<div class="big-he">'+heTxt(w.h)+'</div>'+hint
+      ? sec+mark+'<div class="big-he">'+heW(w)+'</div>'+hint
       : sec+mark+'<div class="big-ru">'+w.r+'</div>'+hint;
   } else {
     html = cur.d==="he"
       ? sec+mark+'<div class="tr">'+w.t+'</div><div class="ru2">'+w.r+'</div>'
-      : sec+mark+'<div class="big-he mid">'+heTxt(w.h)+'</div><div class="tr">'+w.t+'</div>';
+      : sec+mark+'<div class="big-he mid">'+heW(w)+'</div><div class="tr">'+w.t+'</div>';
   }
   card.innerHTML=html;
   answers.className=flipped?"answers show":"answers";
@@ -622,7 +623,7 @@ function wTotals(w){
   return { v:(a.v|0)+(b.v|0), e:(a.e|0)+(b.e|0), f:(a.f?1:0)+(b.f?1:0) };
 }
 function asmTarget(w){
-  var first=stripNikud(w.h).split(" / ")[0];
+  var first=(w.m || stripNikud(w.h)).split(" / ")[0];
   var words=first.split(" ").map(function(x){ return x.replace(/[^\u05D0-\u05EA]/g,""); }).filter(function(x){ return x; });
   if(!words.length || words.length>2) return null;
   var letters=words.join("");
@@ -724,17 +725,17 @@ function renderRound(){
     nb.addEventListener("click",function(){ rI++; renderRound(); });
     try{ nb.scrollIntoView({block:"nearest"}); }catch(e){}
   }
-  function wordLine(x){ return '<b>'+heTxt(x.h)+'</b> — <i>'+x.t+'</i> — '+x.r; }
+  function wordLine(x){ return '<b>'+heW(x)+'</b> — <i>'+x.t+'</i> — '+x.r; }
   function sentPair(raw){ return (typeof raw==="string") ? [raw,"",""] : [raw[0]||"", raw[1]||"", raw[2]||""]; }
   if(cur.type==="ctx"){
     var pr=sentPair(SENT[w.h][Math.floor(Math.random()*SENT[w.h].length)]);
     var ow=pickDistr(w,"h"); ow.push(w);
     ow.sort(function(){return Math.random()-.5;});
     panel.innerHTML='<div class="ritQ">Какое слово пропущено?</div><div class="ritHe">'+pr[0]+'</div>';
-    var g1=optBtns(panel, ow.map(function(x){return heTxt(x.h);}), true, ow.indexOf(w), function(ok){
+    var g1=optBtns(panel, ow.map(function(x){return heW(x);}), true, ow.indexOf(w), function(ok){
       if(ok) ritMark(w,"ru",true);
       var rows=ow.map(function(x){
-        return '<div class="row"><span class="rh">'+heTxt(x.h)+'</span><span><i>'+x.t+'</i> · '+x.r+(x===w?" ✓":"")+'</span></div>';
+        return '<div class="row"><span class="rh">'+heW(x)+'</span><span><i>'+x.t+'</i> · '+x.r+(x===w?" ✓":"")+'</span></div>';
       }).join("");
       var html='<div class="ritQ">Пропущено: '+wordLine(w)+'</div>'+
         (pr[2]?'<div class="ritQ" style="color:var(--brick)"><i>'+pr[2]+'</i></div>':"")+
@@ -791,7 +792,7 @@ function renderRound(){
     var dis2=pickDistr(w,"r");
     var opts2=dis2.map(function(x){return x.r;}); opts2.push(w.r);
     opts2.sort(function(){return Math.random()-.5;});
-    panel.innerHTML='<div class="ritQ">Что это значит?</div><div class="ritHe">'+heTxt(w.h)+'</div>';
+    panel.innerHTML='<div class="ritQ">Что это значит?</div><div class="ritHe">'+heW(w)+'</div>';
     var g2=optBtns(panel, opts2, false, opts2.indexOf(w.r), function(ok){
       if(ok) ritMark(w,"he",true);
       var html='<div class="ritQ">'+wordLine(w)+'</div>';
@@ -830,7 +831,7 @@ function finishRitual(empty){
   var good=rRes.filter(function(r){return r.ok;}).length;
   var st=$("ritStage");
   var rows=rRes.map(function(r){
-    return '<div class="row"><span class="rh">'+heTxt(r.w.h)+'</span><span><i>'+r.w.t+'</i> · '+r.w.r+'</span><b style="color:'+(r.ok?'var(--green)':'var(--red)')+'">'+(r.ok?'✓':'✗')+'</b></div>';
+    return '<div class="row"><span class="rh">'+heW(r.w)+'</span><span><i>'+r.w.t+'</i> · '+r.w.r+'</span><b style="color:'+(r.ok?'var(--green)':'var(--red)')+'">'+(r.ok?'✓':'✗')+'</b></div>';
   }).join("");
   st.innerHTML='<div class="ritPanel"><div class="ritHe">!סוֹף</div>'+
     '<p>Разбор выполнен: <b>'+good+'</b> из <b>'+rRes.length+'</b> · следующий: '+nextDueLabel()+'</p>'+
